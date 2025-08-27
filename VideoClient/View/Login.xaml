@@ -1,0 +1,13 @@
+﻿<Window x:Class="VideoClient.Login"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VideoClient"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        mc:Ignorable="d" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow"  
+        Title="Login" BorderThickness="2" BorderBrush="#FF333738" Loaded="Window_Loaded">
+    <Grid>
+        <wv2:WebView2 MaxWidth="500" MaxHeight="500" x:Name="Browser" NavigationStarting="Browser_NavigationStarting"/>
+    </Grid>
+</Window>
