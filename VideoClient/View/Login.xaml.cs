@@ -1,4 +1,6 @@
 ﻿using Dropbox.Api;
+using Microsoft.Web.WebView2.Core;
+using System.IO;
 using System.Windows;
 
 namespace VideoClient
@@ -51,9 +53,9 @@ namespace VideoClient
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            await Browser.EnsureCoreWebView2Async();
+            var webView2Environment = await CoreWebView2Environment.CreateAsync(null, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EdgeWebView2"));
+            await Browser.EnsureCoreWebView2Async(webView2Environment);
             await Dispatcher.BeginInvoke(new Action(Navigate));
-            // Navigate();  
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -67,38 +69,6 @@ namespace VideoClient
                 throw;
             }
 
-        }
-
-        private void Browser_Navigating(object sender, System.Windows.Navigation.NavigatingCancelEventArgs e)
-        {
-            if (!e.Uri.AbsoluteUri.ToString().StartsWith(RedirectUri.ToString(), StringComparison.OrdinalIgnoreCase))
-            {
-                // we need to ignore all navigation that isn't to the redirect uri.  
-                return;
-            }
-
-            try
-            {
-                OAuth2Response result = DropboxOAuth2Helper.ParseTokenFragment(e.Uri);
-                if (result.State != DropBoxoauth2State)
-                {
-                    return;
-                }
-
-                this.AccessToken = result.AccessToken;
-                this.Uid = result.Uid;
-                this.Result = true;
-            }
-
-            catch (ArgumentException ex)
-            {
-            }
-
-            finally
-            {
-                e.Cancel = true;
-                this.Close();
-            }
         }
 
         private void Browser_NavigationStarting(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationStartingEventArgs e)

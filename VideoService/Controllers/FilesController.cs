@@ -18,7 +18,7 @@ namespace VideoService.Controllers
         }
 
         [HttpGet("delete")]
-        public async Task<IActionResult> DeleteFile([FromQuery] string fileName)
+        public async Task<IActionResult> DeleteFile([FromQuery] string filePath)
         {
             try
             {
@@ -32,24 +32,15 @@ namespace VideoService.Controllers
                     };
                 }
 
-                var fullPath = $"/{fileName}";
-                var commitInfo = new CommitInfo(
-                    path: fullPath,
-                    mode: WriteMode.Overwrite.Instance // Overwrite if the file already exists.
-                );
-                using (var dropBoxClient = new DropboxClient(accessToken))
-                {
-                    var uploadUrl = await dropBoxClient.Files.GetTemporaryUploadLinkAsync(new GetTemporaryUploadLinkArg(commitInfo));
-                    return Ok(new { Url = uploadUrl.Link });
-                }
+                await _videoUpload.Delete(accessToken, filePath);
+
+                return Ok();
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
-
-
 
         [HttpGet]
         public async Task<JsonResult> GetFiles()

@@ -50,6 +50,15 @@ namespace VideoClient.Viewmodel
             }
         }
 
+        private string _busyText;
+
+        public string BusyText
+        {
+            get { return _busyText; }
+            set { _busyText = value; OnPropertyChanged(); }
+        }
+
+
         private bool isAuthenticated = false;
 
         public bool IsAuthenticated
@@ -107,11 +116,14 @@ namespace VideoClient.Viewmodel
             UploadCommand = new RelayCommand(DoUpload);
             DownloadCommand = new RelayCommand(DoDownload);
             DeleteCommand = new RelayCommand(DoDelete);
+
+            BusyText = "Please Wait...";
         }
 
         private async void DoDelete()
         {
             ShowBusyIndicator = true;
+            BusyText = "Deleting...";
             try
             {
                 if (SelectedItem == null || string.IsNullOrWhiteSpace(SelectedItem.PathDisplay))
@@ -122,30 +134,46 @@ namespace VideoClient.Viewmodel
 
                 if (UseHttpClient)
                 {
+                    using (var client = new HttpClient())
+                    {
+                        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", strAccessToken);
+                        var response = await client.GetAsync($"{WEB_API_HOST}/api/v1/files/delete?filePath={SelectedItem.PathDisplay}");
 
+                        if (response.IsSuccessStatusCode)
+                        {
+                            MessageBox.Show("File deleted successfully.", "File Deleted", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("File deletion failed.", "File Deletion Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
                 }
                 else
                 {
-
                     await _videoUpload.Delete(strAccessToken, SelectedItem.PathDisplay);
                     MessageBox.Show("File deleted successfully.", "File Deleted", MessageBoxButton.OK, MessageBoxImage.Information);
-                    var files = await _videoUpload.GetAllFiles(strAccessToken);
-                    CloudFilesCollection = new ObservableCollection<CloudFile>(files);
                 }
+
+                var files = await GetCloudFiles(strAccessToken);
+                CloudFilesCollection = new ObservableCollection<CloudFile>(files);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "File Fetch Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, "File delete Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
                 ShowBusyIndicator = false;
+                BusyText = "Please Wait...";
             }
 
         }
 
         private async void DoDownload()
         {
+            ShowBusyIndicator = true;
+            BusyText = "Downloading...";
             try
             {
                 if (SelectedItem == null || string.IsNullOrWhiteSpace(SelectedItem.PathDisplay))
@@ -154,16 +182,16 @@ namespace VideoClient.Viewmodel
                     return;
                 }
 
-                ShowBusyIndicator = true;
                 await _videoUpload.Download(strAccessToken, SelectedItem.PathDisplay, DownloadFolder + SelectedItem.Name);
             }
             catch (Exception ex)
             {
-               MessageBox.Show(ex.Message, "Download Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, "Download Failed", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
                 ShowBusyIndicator = false;
+                BusyText = "Please Wait...";
             }
         }
 
@@ -183,9 +211,13 @@ namespace VideoClient.Viewmodel
                 }
 
                 ShowBusyIndicator = true;
+                BusyText = "Uploading...";
+
                 var fileName = Path.GetFileName(openFileDialog.FileName);
 
-                if (UseHttpClient)
+                var useHttpClient = false;
+
+                if (useHttpClient)
                 {
                     using (var client = new HttpClient())
                     {
@@ -225,6 +257,7 @@ namespace VideoClient.Viewmodel
             finally
             {
                 ShowBusyIndicator = false;
+                BusyText = "Please Wait...";
             }
         }
 
@@ -233,6 +266,7 @@ namespace VideoClient.Viewmodel
             try
             {
                 ShowBusyIndicator = true;
+                BusyText = "Authenticating...";
 
                 if (string.IsNullOrEmpty(APP_KEY))
                 {
@@ -267,6 +301,7 @@ namespace VideoClient.Viewmodel
             finally
             {
                 ShowBusyIndicator = false;
+                BusyText = "Please Wait...";
             }
         }
 

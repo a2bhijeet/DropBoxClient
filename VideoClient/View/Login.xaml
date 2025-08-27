@@ -6,8 +6,9 @@
         xmlns:local="clr-namespace:VideoClient"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow"  
-        Title="Login" BorderThickness="2" BorderBrush="#FF333738" Loaded="Window_Loaded">
+        Title="Login" BorderThickness="2" BorderBrush="#FF333738" Loaded="Window_Loaded"
+        MaxHeight="500" MaxWidth="400">
     <Grid>
-        <wv2:WebView2 MaxWidth="500" MaxHeight="500" x:Name="Browser" NavigationStarting="Browser_NavigationStarting"/>
+        <wv2:WebView2 x:Name="Browser" NavigationStarting="Browser_NavigationStarting"/>
     </Grid>
 </Window>

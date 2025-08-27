@@ -1,10 +1,6 @@
 @VideoService_HostAddress = https://localhost:7268
 
-GET {{VideoService_HostAddress}}/api/v1/files
-
-###
-
-@fileName=string
-GET {{VideoService_HostAddress}}/api/v1/files/get-upload-url?fileName={{fileName}}
+@filePath=string
+GET {{VideoService_HostAddress}}/api/v1/files/delete?filePath={{filePath}}
 
 ###

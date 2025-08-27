@@ -14,7 +14,7 @@
         <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolVisConverter"></converters:InverseBooleanToVisibilityConverter>
     </Window.Resources>
     <Grid>
-        <wpfToolkit:BusyIndicator x:Name="busyIndicator" IsBusy="{Binding ShowBusyIndicator}" BusyContent="Loading...">
+        <wpfToolkit:BusyIndicator x:Name="busyIndicator" IsBusy="{Binding ShowBusyIndicator}" BusyContent="{Binding BusyText}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

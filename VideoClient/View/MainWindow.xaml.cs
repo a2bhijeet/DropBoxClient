@@ -13,7 +13,7 @@ namespace VideoClient.UI
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainViewModel(useHttpClient: false, new VideoUpload()); ;
+            DataContext = new MainViewModel(useHttpClient: true, new VideoUpload()); ;
         }
         #endregion
     }
