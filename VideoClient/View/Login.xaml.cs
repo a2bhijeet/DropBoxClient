@@ -33,6 +33,13 @@ namespace VideoClient
             DropBoxoauth2State = oauth2State;
         }
 
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var webView2Environment = await CoreWebView2Environment.CreateAsync(null, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EdgeWebView2"));
+            await Browser.EnsureCoreWebView2Async(webView2Environment);
+            await Dispatcher.BeginInvoke(new Action(Navigate));
+        }
+
         public void Navigate()
         {
             try
@@ -47,28 +54,8 @@ namespace VideoClient
             }
             catch (Exception)
             {
-                throw;
+                MessageBox.Show("Error while generating Authentication URL. Please check the App Key.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            var webView2Environment = await CoreWebView2Environment.CreateAsync(null, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EdgeWebView2"));
-            await Browser.EnsureCoreWebView2Async(webView2Environment);
-            await Dispatcher.BeginInvoke(new Action(Navigate));
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                this.Close();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
         }
 
         private void Browser_NavigationStarting(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationStartingEventArgs e)
