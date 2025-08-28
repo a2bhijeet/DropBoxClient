@@ -53,7 +53,7 @@
                             <Button x:Name="btlUpload" Width="100" Content="Upload" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.Row="1" FontSize="14" Command="{Binding UploadCommand}"/>
                             <Button x:Name="btnDownload" Width="100" Content="Download" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.Row="1" FontSize="14" IsEnabled="{Binding SelectedItem, TargetNullValue=False}" Command="{Binding DownloadCommand}"/>
                             <Button x:Name="btnDelete" Width="100" IsEnabled="{Binding SelectedItem, TargetNullValue=False}" Content="Delete" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.Row="1" FontSize="14" Command="{Binding DeleteCommand}" />
-                            <Button x:Name="btnShowileVersion" Width="120" IsEnabled="{Binding SelectedItem, TargetNullValue=False}" Content="Show file version" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.Row="1" FontSize="14" Command="{Binding ShowFileVersionCommand}" />
+                            <Button x:Name="btnShowileVersion" Width="120" IsEnabled="{Binding SelectedItem, TargetNullValue=False}" Content="Show file revision" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.Row="1" FontSize="14" Command="{Binding ShowFileVersionCommand}" />
                         </StackPanel>
 
                         <DataGrid x:Name="dataGrid" 

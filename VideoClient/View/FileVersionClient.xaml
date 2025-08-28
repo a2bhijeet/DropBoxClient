@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         xmlns:viewmodel="clr-namespace:VideoClient.Viewmodel"
         d:DataContext="{d:DesignInstance Type=viewmodel:FileVersionViewModel}"
-        Title="File Version" Height="500" Width="500">
+        Title="File Revisions" Height="500" Width="500">
     <Grid>
         <wpfToolkit:BusyIndicator x:Name="busyIndicator" IsBusy="{Binding ShowBusyIndicator}" BusyContent="Please Wait...">
             <Grid>
