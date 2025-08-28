@@ -4,11 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VideoClient.UI"
-        xmlns:wpfToolkit="http://schemas.xceed.com/wpf/xaml/toolkit" xmlns:viewmodel="clr-namespace:VideoClient.Viewmodel"
+        xmlns:wpfToolkit="http://schemas.xceed.com/wpf/xaml/toolkit" 
+        xmlns:viewmodel="clr-namespace:VideoClient.Viewmodel"
         xmlns:converters="clr-namespace:VideoClient.Converter"
         d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
         mc:Ignorable="d"  
-        Title="MainWindow" Height="Auto" Width="1024" MinHeight="300" MinWidth="600">
+        Title="Manage Video" Height="Auto" Width="1024" MinHeight="300" MinWidth="600">
     <Window.Resources>
         <converters:BooleanToVisibilityConverter x:Key="boolVisConverter"></converters:BooleanToVisibilityConverter>
         <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolVisConverter"></converters:InverseBooleanToVisibilityConverter>
@@ -48,9 +49,11 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button x:Name="btlUpload" Width="100" Content="Upload" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="2" FontSize="14" Command="{Binding UploadCommand}"/>
-                            <Button x:Name="btnDownload" Width="100" Content="Download" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="3" FontSize="14" IsEnabled="{Binding SelectedItem, TargetNullValue=False}" Command="{Binding DownloadCommand}"/>
-                            <Button x:Name="btnDelete" Width="100" IsEnabled="{Binding SelectedItem, TargetNullValue=False}" Content="Delete" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="4" FontSize="14" Command="{Binding DeleteCommand}" />
+                            <Button x:Name="btlRefresh" Width="100" Content="Refresh Files" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.Row="1" FontSize="14" Command="{Binding RefreshCommand}"/>
+                            <Button x:Name="btlUpload" Width="100" Content="Upload" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.Row="1" FontSize="14" Command="{Binding UploadCommand}"/>
+                            <Button x:Name="btnDownload" Width="100" Content="Download" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.Row="1" FontSize="14" IsEnabled="{Binding SelectedItem, TargetNullValue=False}" Command="{Binding DownloadCommand}"/>
+                            <Button x:Name="btnDelete" Width="100" IsEnabled="{Binding SelectedItem, TargetNullValue=False}" Content="Delete" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.Row="1" FontSize="14" Command="{Binding DeleteCommand}" />
+                            <Button x:Name="btnShowileVersion" Width="120" IsEnabled="{Binding SelectedItem, TargetNullValue=False}" Content="Show file version" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.Row="1" FontSize="14" Command="{Binding ShowFileVersionCommand}" />
                         </StackPanel>
 
                         <DataGrid x:Name="dataGrid" 

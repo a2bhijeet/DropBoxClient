@@ -2,7 +2,7 @@
 
 namespace VideoBackend.Model
 {
-    public class CloudFile
+    public class CloudFileMetadata
     {
         [JsonProperty(PropertyName = "id")]
         public string ID { get; set; }

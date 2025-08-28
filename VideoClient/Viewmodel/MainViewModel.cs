@@ -6,8 +6,10 @@ using System.IO;
 using System.Net.Http;
 using System.Windows;
 using System.Windows.Input;
-using VideoBackend;
+using VideoBackend.Interface;
 using VideoBackend.Model;
+using VideoClient.View;
+using static Dropbox.Api.TeamLog.EventCategory;
 
 namespace VideoClient.Viewmodel
 {
@@ -25,7 +27,8 @@ namespace VideoClient.Viewmodel
         private string strAccessToken = string.Empty;
         private string strAuthenticationURL = string.Empty;
         private DropBoxBase _dropBoxBase;
-        private VideoUpload _videoUpload;
+        private IFileOperation _fileOperation;
+        private IUserOperation _userOperation;
 
         public bool UseHttpClient { get; set; } = false;
 
@@ -68,9 +71,9 @@ namespace VideoClient.Viewmodel
         }
 
 
-        private ObservableCollection<CloudFile> _cloudFilesCollection;
+        private ObservableCollection<CloudFileMetadata> _cloudFilesCollection;
 
-        public ObservableCollection<CloudFile> CloudFilesCollection
+        public ObservableCollection<CloudFileMetadata> CloudFilesCollection
         {
             get { return _cloudFilesCollection; }
             set
@@ -80,9 +83,9 @@ namespace VideoClient.Viewmodel
             }
         }
 
-        private CloudFile? _selectedItem = null;
+        private CloudFileMetadata? _selectedItem = null;
 
-        public CloudFile? SelectedItem
+        public CloudFileMetadata? SelectedItem
         {
             get { return _selectedItem; }
             set
@@ -94,6 +97,8 @@ namespace VideoClient.Viewmodel
 
         #region Commands
 
+        public ICommand RefreshCommand { get; private set; }
+
         public ICommand AuthenticateCommand { get; private set; }
 
         public ICommand UploadCommand { get; private set; }
@@ -102,22 +107,73 @@ namespace VideoClient.Viewmodel
 
         public ICommand DeleteCommand { get; private set; }
 
+        public ICommand ShowFileVersionCommand { get; private set; }
+
         #endregion
 
 
-        public MainViewModel(bool useHttpClient, VideoUpload videoUpload)
+        public MainViewModel(bool useHttpClient, IFileOperation fileOperation, IUserOperation userOperation)
         {
             UseHttpClient = useHttpClient;
-            _videoUpload = videoUpload;
+            _fileOperation = fileOperation;
+            _userOperation = userOperation;
             _dropBoxBase = new DropBoxBase(APP_KEY, APP_NAME);
 
-            CloudFilesCollection = new ObservableCollection<CloudFile>();
+            CloudFilesCollection = new ObservableCollection<CloudFileMetadata>();
+            RefreshCommand = new RelayCommand(DoRefresh);
             AuthenticateCommand = new RelayCommand(DoAuthenticate);
             UploadCommand = new RelayCommand(DoUpload);
             DownloadCommand = new RelayCommand(DoDownload);
             DeleteCommand = new RelayCommand(DoDelete);
+            ShowFileVersionCommand = new RelayCommand(DoShowFileVersion);
 
             BusyText = "Please Wait...";
+        }
+
+        private async void DoRefresh()
+        {
+            ShowBusyIndicator = true;
+            BusyText = "Fetching files...";
+
+            try
+            {
+                var files = await _fileOperation.GetAllFiles(strAccessToken);
+                CloudFilesCollection = new ObservableCollection<CloudFileMetadata>(files);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Error while fetching files", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                ShowBusyIndicator = false;
+                BusyText = "Please Wait...";
+            }
+        }
+
+        private void DoShowFileVersion()
+        {
+            try
+            {
+                ShowBusyIndicator = true;
+                if (SelectedItem == null || string.IsNullOrWhiteSpace(SelectedItem.PathDisplay))
+                {
+                    MessageBox.Show("Please select a file to delete.", "No File Selected", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                var fileVersion = new FileVersionClient(_fileOperation, SelectedItem, strAccessToken);
+                fileVersion.ShowDialog();
+                ShowBusyIndicator = false;
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Error while fetching file versions.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                ShowBusyIndicator = false;
+                BusyText = "Please Wait...";
+            }
         }
 
         private async void DoDelete()
@@ -151,12 +207,12 @@ namespace VideoClient.Viewmodel
                 }
                 else
                 {
-                    await _videoUpload.Delete(strAccessToken, SelectedItem.PathDisplay);
+                    await _fileOperation.Delete(strAccessToken, SelectedItem.PathDisplay);
                     MessageBox.Show("File deleted successfully.", "File Deleted", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
                 var files = await GetCloudFiles(strAccessToken);
-                CloudFilesCollection = new ObservableCollection<CloudFile>(files);
+                CloudFilesCollection = new ObservableCollection<CloudFileMetadata>(files);
             }
             catch (Exception ex)
             {
@@ -167,7 +223,6 @@ namespace VideoClient.Viewmodel
                 ShowBusyIndicator = false;
                 BusyText = "Please Wait...";
             }
-
         }
 
         private async void DoDownload()
@@ -182,7 +237,7 @@ namespace VideoClient.Viewmodel
                     return;
                 }
 
-                await _videoUpload.Download(strAccessToken, SelectedItem.PathDisplay, DownloadFolder + SelectedItem.Name);
+                await _fileOperation.Download(strAccessToken, SelectedItem.PathDisplay, DownloadFolder + SelectedItem.Name);
             }
             catch (Exception ex)
             {
@@ -243,9 +298,9 @@ namespace VideoClient.Viewmodel
                 }
                 else
                 {
-                    await _videoUpload.UploadLargeFile(strAccessToken, openFileDialog.FileName, "/" + fileName);
+                    await _fileOperation.UploadLargeFile(strAccessToken, openFileDialog.FileName, "/" + fileName);
                     var files = await GetCloudFiles(strAccessToken);
-                    CloudFilesCollection = new ObservableCollection<CloudFile>(files);
+                    CloudFilesCollection = new ObservableCollection<CloudFileMetadata>(files);
 
                     MessageBox.Show("File uploaded successfully.", "Upload Successful", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -285,10 +340,10 @@ namespace VideoClient.Viewmodel
                     return;
                 }
 
-                var user = await _videoUpload.GetCurrentAccountAsync(strAccessToken);
+                var user = await _userOperation.GetCurrentAccountAsync(strAccessToken);
 
                 var files = await GetCloudFiles(strAccessToken);
-                CloudFilesCollection = new ObservableCollection<CloudFile>(files);
+                CloudFilesCollection = new ObservableCollection<CloudFileMetadata>(files);
                 WelcomeText = $"Welcome {user.DisplayName} ({user.Email})";
                 MessageBox.Show("Authentication complete");
 
@@ -305,9 +360,9 @@ namespace VideoClient.Viewmodel
             }
         }
 
-        private async Task<IList<CloudFile>> GetCloudFiles(string accessToken)
+        private async Task<IList<CloudFileMetadata>> GetCloudFiles(string accessToken)
         {
-            IList<CloudFile> files = new List<CloudFile>();
+            IList<CloudFileMetadata> files = new List<CloudFileMetadata>();
             try
             {
                 if (UseHttpClient)
@@ -322,14 +377,14 @@ namespace VideoClient.Viewmodel
                             string jsonResponse = await response.Content.ReadAsStringAsync();
                             if (!string.IsNullOrWhiteSpace(jsonResponse))
                             {
-                                files = JsonConvert.DeserializeObject<List<CloudFile>>(jsonResponse);
+                                files = JsonConvert.DeserializeObject<List<CloudFileMetadata>>(jsonResponse);
                             }
                         }
                     }
                 }
                 else
                 {
-                    files = await _videoUpload.GetAllFiles(accessToken);
+                    files = await _fileOperation.GetAllFiles(accessToken);
                 }
             }
             catch (Exception ex)
@@ -337,7 +392,7 @@ namespace VideoClient.Viewmodel
                 MessageBox.Show(ex.Message, "File Fetch Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            return files ?? new List<CloudFile>();
+            return files ?? new List<CloudFileMetadata>();
         }
     }
 }

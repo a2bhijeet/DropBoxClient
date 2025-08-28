@@ -2,7 +2,7 @@
 using Dropbox.Api.Files;
 using Microsoft.AspNetCore.Mvc;
 using VideoBackend;
-using VideoBackend.Model;
+using VideoBackend.Interface;
 
 namespace VideoService.Controllers
 {
@@ -10,11 +10,11 @@ namespace VideoService.Controllers
     [ApiController]
     public class FilesController : ControllerBase
     {
-        private VideoUpload _videoUpload;
+        private IFileOperation _fileOperation;
 
         public FilesController()
         {
-            _videoUpload = new VideoUpload();
+            _fileOperation = new FileOperation();
         }
 
         [HttpGet("delete")]
@@ -32,7 +32,7 @@ namespace VideoService.Controllers
                     };
                 }
 
-                await _videoUpload.Delete(accessToken, filePath);
+                await _fileOperation.Delete(accessToken, filePath);
 
                 return Ok();
             }
@@ -57,7 +57,7 @@ namespace VideoService.Controllers
                     };
                 }
 
-                var files = await _videoUpload.GetAllFiles(accessToken);
+                var files = await _fileOperation.GetAllFiles(accessToken);
                 return new JsonResult(files);
             }
             catch (Exception ex)
